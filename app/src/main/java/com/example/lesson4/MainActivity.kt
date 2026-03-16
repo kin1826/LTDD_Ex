@@ -30,6 +30,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -199,10 +201,6 @@ fun Roll(onBack: () -> Unit) {
                 }
             )
         }
-
-//        history.forEach {
-//            Text("\uD83C\uDFB2 $it")
-//        }
     }
 }
 
@@ -217,7 +215,20 @@ fun Roll3Dice(onBack: () -> Unit) {
 
     var showHistory by remember { mutableStateOf(false) }
 
+    val scope = rememberCoroutineScope()
+
     fun diceImage(value: Int): Int {
+        return when (value) {
+            1 -> R.drawable.dice_1
+            2 -> R.drawable.dice_2
+            3 -> R.drawable.dice_3
+            4 -> R.drawable.dice_4
+            5 -> R.drawable.dice_5
+            else -> R.drawable.dice_6
+        }
+    }
+
+    fun getDiceImage(value: Int): Int {
         return when (value) {
             1 -> R.drawable.dice_1
             2 -> R.drawable.dice_2
@@ -248,19 +259,19 @@ fun Roll3Dice(onBack: () -> Unit) {
         ) {
 
             Image(
-                painter = painterResource(diceImage(dice1)),
+                painter = painterResource(getDiceImage(dice1)),
                 contentDescription = "Dice1",
                 modifier = Modifier.size(100.dp)
             )
 
             Image(
-                painter = painterResource(diceImage(dice2)),
+                painter = painterResource(getDiceImage(dice2)),
                 contentDescription = "Dice2",
                 modifier = Modifier.size(100.dp)
             )
 
             Image(
-                painter = painterResource(diceImage(dice3)),
+                painter = painterResource(getDiceImage(dice3)),
                 contentDescription = "Dice3",
                 modifier = Modifier.size(100.dp)
             )
@@ -270,9 +281,21 @@ fun Roll3Dice(onBack: () -> Unit) {
 
         Button(
             onClick = {
-                dice1 = (1..6).random()
-                dice2 = (1..6).random()
-                dice3 = (1..6).random()
+                scope.launch {
+                    repeat(12) {
+                        dice1 = (1..6).random()
+                        dice2 = (1..6).random()
+                        dice3 = (1..6).random()
+
+                        delay(60)
+                    }
+
+                    dice1 = (1..6).random()
+                    dice2 = (1..6).random()
+                    dice3 = (1..6).random()
+                }
+
+
 
                 history3.add(0, Triple(dice1, dice2, dice3))
             }
@@ -327,7 +350,9 @@ fun Roll3Dice(onBack: () -> Unit) {
 }
 
 fun compare(total: Int): String {
-    return if (total <= 10) {
+    return if (total == 3 || total == 18) {
+        "TAM HOA"
+    } else if (total <= 10) {
         "Xỉu"
     } else {
         "Tài"
